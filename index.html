@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Movie Review Sentiment Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background-color: #f0f2f5;
+            --container-bg: #ffffff;
+            --text-color: #333;
+            --zinc-color: #a1a1aa;
+            --border-color: #e2e8f0;
+            --button-color: #1f2937;
+            --button-hover: #374151;
+            --positive-color: #22c55e;
+            --negative-color: #ef4444;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 650px;
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 500;
+            color: #1a202c;
+            margin-bottom: 10px;
+        }
+
+        p {
+            text-align: center;
+            color: var(--zinc-color);
+            margin-bottom: 30px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 15px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 16px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        textarea::placeholder {
+            color: var(--zinc-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: var(--button-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+        }
+
+        #result {
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: 500;
+            margin-top: 30px;
+            min-height: 25px; /* To prevent layout shift */
+        }
+        
+        #result .positive {
+            color: var(--positive-color);
+        }
+
+        #result .negative {
+            color: var(--negative-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Movie Review Sentiment Analyzer</h1>
+        <p>Enter a movie review below and get an instant sentiment prediction.</p>
+        <textarea id="reviewInput" placeholder="I absolutely loved this movie! The acting was brilliant, and the story kept me on the edge of my seat."></textarea>
+        <button onclick="predictSentiment()">Analyze Review</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function predictSentiment() {
+            const review = document.getElementById('reviewInput').value;
+            if (!review.trim()) {
+                alert('Please enter a review to analyze.');
+                return;
+            }
+
+            // Simple loading indicator
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<span style="color: var(--zinc-color);">Analyzing...</span>';
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 'review': review })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Server returned an error.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const sentiment = data.sentiment;
+                const sentimentClass = sentiment === 'positive' ? 'positive' : 'negative';
+                resultDiv.innerHTML = `Prediction: The review is <span class="${sentimentClass}">${sentiment}</span>.`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<span style="color: var(--negative-color);">An error occurred. Please try again.</span>';
+            });
+        }
+    </script>
+</body>
+</html>
